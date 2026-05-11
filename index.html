@@ -855,12 +855,14 @@ async function fetchData(){
     const json = await resp.json();
     if(json.error) throw new Error(json.error);
 
-    // DATAに反映
+    // DATAに反映（store_shortを先に更新してからstoresをリセット）
     DATA.store_person          = json.store_person||{};
     DATA.targets               = json.targets||{};
     DATA.store_type            = json.store_type||{};
     DATA.store_short           = json.store_short||{};
     DATA.store_royalty_pattern = json.store_royalty_pattern||{};
+    // storesをリセット（古いフル名データを完全除去）
+    DATA.stores.length = 0;
     if(json.persons && json.persons.length > 0) DATA.persons = json.persons.filter(p => p !== '雛形');
 
     if(json.actual_data && Object.keys(json.actual_data).length > 0){
@@ -1089,17 +1091,18 @@ function dispName(fullName){return(DATA.store_short&&DATA.store_short[fullName])
 // DATA.dataの全月から店舗リストを再構築（BM店舗など動的追加に対応）
 function rebuildStores(){
   // store_shortのvalue（略称）を有効キーとして使用
-  // store_shortは {フル名: 略称} のマップなのでvalueが略称
   const shortVals = new Set(Object.values(DATA.store_short||{}));
-  // targetsのキーも追加（直営店は store_short に含まれない場合がある）
+  // targetsのキーも追加（直営店はstore_shortに含まれない場合がある）
   const targetKeys = new Set(Object.keys(DATA.targets||{}));
-  // 両方のセットを合わせた有効な略称セット
   const validKeys = new Set([...shortVals, ...targetKeys]);
 
-  const storeSet = new Set(DATA.stores);
+  // DATA.storesを完全リセット（古いフル名データを除去）
+  DATA.stores.length = 0;
+  const storeSet = new Set();
+
   Object.keys(DATA.data).forEach(function(month){
     Object.keys(DATA.data[month]).forEach(function(store){
-      // 有効な略称セットに含まれるもののみ追加（正式名称・フル名を排除）
+      // 有効な略称のみ追加（フル名・正式名称は排除）
       if(!storeSet.has(store) && validKeys.has(store)){
         storeSet.add(store);
         DATA.stores.push(store);
