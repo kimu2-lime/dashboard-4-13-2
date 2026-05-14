@@ -516,7 +516,7 @@ body.mobile .search-box{width:100%}
 .insight-section.danger   .insight-section-title{color:#b91c1c}
 .insight-section.priority .insight-section-title{color:#4338ca}
 .insight-section-sub{font-size:11px;font-weight:500;color:#999;margin-left:6px}
-.insight-row{display:grid;grid-template-columns:32px 1fr auto auto;gap:12px;align-items:center;padding:8px 8px;border-bottom:1px solid #f0f0f8;font-size:13px;cursor:pointer;transition:background .15s}
+.insight-row{display:grid;grid-template-columns:32px 1fr auto auto auto;gap:12px;align-items:center;padding:8px 8px;border-bottom:1px solid #f0f0f8;font-size:13px;cursor:pointer;transition:background .15s}
 .insight-row:last-child{border-bottom:none}
 .insight-row:hover{background:#fafafe}
 .insight-rank{font-weight:800;color:#9ca3af;font-size:13px;text-align:center}
@@ -530,8 +530,25 @@ body.mobile .search-box{width:100%}
 .insight-score.danger  {background:#fee2e2;color:#991b1b}
 .insight-score.priority{background:#e0e7ff;color:#3730a3}
 .insight-empty{padding:18px;text-align:center;color:#aaa;font-size:12px}
+.insight-item{border-bottom:1px solid #f0f0f8}
+.insight-item:last-child{border-bottom:none}
+.insight-item .insight-row{border-bottom:none}
+.insight-chevron{color:#ccc;font-size:12px;transition:transform .2s;flex-shrink:0;margin-left:4px}
+.insight-item.open .insight-chevron{transform:rotate(90deg)}
+.insight-item.open .insight-row{background:#fafafe}
+.insight-body{display:none;padding:12px 8px 16px;border-top:1px dashed #eef0f8}
+.insight-item.open .insight-body{display:block;animation:slideDown .2s ease}
+.insight-body-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;margin-bottom:12px}
+.insight-reasons-full{font-size:12px;color:#555;background:#fafafe;border-radius:8px;padding:10px 12px;margin-bottom:10px;line-height:1.6}
+.insight-reasons-full .ir-label{font-weight:700;color:#888;font-size:10px;letter-spacing:1px;text-transform:uppercase;display:block;margin-bottom:4px}
+.insight-breakdown{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:6px;font-size:11px;margin-bottom:10px}
+.insight-breakdown .bd-item{background:#f8f9ff;border-radius:6px;padding:6px 8px}
+.insight-breakdown .bd-label{color:#888;font-size:10px;font-weight:600;margin-bottom:2px}
+.insight-breakdown .bd-value{color:#1a1a2e;font-weight:700}
+.insight-detail-btn{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;transition:opacity .15s}
+.insight-detail-btn:hover{opacity:.88}
 @media(max-width:600px){
-  .insight-row{grid-template-columns:28px 1fr auto;gap:8px}
+  .insight-row{grid-template-columns:28px 1fr auto auto;gap:8px}
   .insight-reason{display:none}
 }
 </style>
@@ -2708,7 +2725,7 @@ function renderInsightTops(month) {
   }
 }
 
-/* ── インサイト行のHTMLを生成 ── */
+/* ── インサイト行のHTMLを生成（行＋展開ボディ）── */
 function insightRowHtml(x, idx, kind) {
   const rank = idx + 1;
   const rankCls = rank <= 3 ? ' r' + rank : '';
@@ -2717,27 +2734,102 @@ function insightRowHtml(x, idx, kind) {
   const score   = kind === 'danger' ? x.insight.danger : x.insight.priority;
   const reason  = (x.insight.reasons || []).slice(0, 2).join(' / ');
   const emoji   = x.insight.status ? x.insight.status.emoji : '';
-  return '<div class="insight-row" data-idx="' + idx + '">'
-       +   '<div class="insight-rank' + rankCls + '">' + rank + '</div>'
-       +   '<div>'
-       +     '<div class="insight-store">' + emoji + ' ' + escHtml(dispName(x.store)) + '</div>'
-       +     personHtml
+  return '<div class="insight-item" data-idx="' + idx + '" data-kind="' + kind + '">'
+       +   '<div class="insight-row">'
+       +     '<div class="insight-rank' + rankCls + '">' + rank + '</div>'
+       +     '<div>'
+       +       '<div class="insight-store">' + emoji + ' ' + escHtml(dispName(x.store)) + '</div>'
+       +       personHtml
+       +     '</div>'
+       +     '<div class="insight-reason">' + escHtml(reason) + '</div>'
+       +     '<div class="insight-score ' + kind + '">' + score + '</div>'
+       +     '<span class="insight-chevron">▶</span>'
        +   '</div>'
-       +   '<div class="insight-reason">' + escHtml(reason) + '</div>'
-       +   '<div class="insight-score ' + kind + '">' + score + '</div>'
+       +   '<div class="insight-body"></div>'
        + '</div>';
 }
 
-/* ── 行クリックで詳細ビューへ遷移 ── */
+/* ── 行クリックで展開トグル（その場で詳細を表示）── */
 function bindInsightRowClicks(container, sortedItems) {
-  container.querySelectorAll('.insight-row').forEach(function(row) {
-    const idx = parseInt(row.getAttribute('data-idx'), 10);
-    const item = sortedItems[idx];
-    if (!item) return;
+  container.querySelectorAll('.insight-item').forEach(function(item) {
+    const idx = parseInt(item.getAttribute('data-idx'), 10);
+    const kind = item.getAttribute('data-kind');
+    const entry = sortedItems[idx];
+    if (!entry) return;
+    const row = item.querySelector('.insight-row');
+    const body = item.querySelector('.insight-body');
     row.addEventListener('click', function() {
-      goToStoreDetail(item.store);
+      const isOpen = item.classList.contains('open');
+      if (!isOpen && !body.dataset.rendered) {
+        body.innerHTML = insightBodyHtml(entry, kind);
+        body.dataset.rendered = '1';
+        const btn = body.querySelector('.insight-detail-btn');
+        if (btn) btn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          goToStoreDetail(entry.store);
+        });
+      }
+      item.classList.toggle('open');
     });
   });
+}
+
+/* ── 展開ボディのHTML（KPI / 理由 / スコア内訳 / 詳細ページボタン）── */
+function insightBodyHtml(entry, kind) {
+  const store = entry.store;
+  const insight = entry.insight;
+  const monthData = (DATA.data && DATA.data[curMonth]) ? DATA.data[curMonth] : {};
+  const actual = monthData[store];
+  const target = (DATA.targets && DATA.targets[store] && DATA.targets[store][curMonth]) || null;
+
+  let html = '';
+
+  if (actual) {
+    html += '<div class="insight-body-grid">'
+         + kpiBoxHtml('総売上',       actual.total_sales,             target ? target.total_sales            : null, '¥', false)
+         + kpiBoxHtml('新規数',       actual.new_count,               target ? target.new_count              : null, '人', false)
+         + kpiBoxHtml('新規契約率',   actual.new_contract_rate,       target ? target.new_contract_rate      : null, '%', true)
+         + kpiBoxHtml('新規契約単価', actual.new_contract_unit_price, target ? target.new_contract_unit_price: null, '¥', false)
+         + '</div>';
+  }
+
+  const reasons = insight.reasons || [];
+  if (reasons.length > 0) {
+    html += '<div class="insight-reasons-full">'
+         +   '<span class="ir-label">' + (kind === 'danger' ? '🚨 危険要因' : '🎯 優先理由') + '</span>'
+         +   reasons.map(function(r){ return '・' + escHtml(r); }).join('<br>')
+         + '</div>';
+  }
+
+  const bd = insight.breakdown || {};
+  const bdItems = [];
+  if (kind === 'danger') {
+    if (bd.salesRisk != null)     bdItems.push({ label: '売上未達リスク', value: Math.round(bd.salesRisk * 100) + '%' });
+    if (bd.newRisk != null)       bdItems.push({ label: '新規未達リスク', value: Math.round(bd.newRisk * 100) + '%' });
+    if (bd.momentum != null)      bdItems.push({ label: '前月比悪化',     value: Math.round(bd.momentum * 100) + '%' });
+    if (bd.lastVisitDays != null) bdItems.push({ label: '最終来店から',   value: bd.lastVisitDays + '日' });
+  } else {
+    if (bd.newGap != null)      bdItems.push({ label: '新規ギャップ',    value: Math.round(bd.newGap * 100) + '%' });
+    if (bd.salesGap != null)    bdItems.push({ label: '売上ギャップ',    value: Math.round(bd.salesGap * 100) + '%' });
+    if (bd.rateGap != null)     bdItems.push({ label: '契約率ギャップ',  value: Math.round(bd.rateGap * 100) + '%' });
+    if (bd.salesImpact != null) bdItems.push({ label: '売上インパクト',  value: bd.salesImpact.toFixed(2) });
+    if (bd.hqCoef != null)      bdItems.push({ label: 'HQ利益係数',      value: bd.hqCoef.toFixed(2) });
+  }
+  if (bdItems.length > 0) {
+    html += '<div class="insight-breakdown">'
+         + bdItems.map(function(it) {
+             return '<div class="bd-item"><div class="bd-label">' + it.label + '</div><div class="bd-value">' + it.value + '</div></div>';
+           }).join('')
+         + '</div>';
+  }
+
+  if (actual) {
+    html += '<button class="insight-detail-btn">📊 店舗詳細ページを開く →</button>';
+  } else {
+    html += '<div style="font-size:12px;color:#aaa">実績データがありません</div>';
+  }
+
+  return html;
 }
 
 /* ── 任意店舗の詳細ビューへ遷移するヘルパー ── */
@@ -2785,7 +2877,7 @@ function renderAnalysis() {
 
   let filtered = allResults;
   if (analysisFilter === 'critical') filtered = allResults.filter(function(r){ return r.severity==='critical'; });
-  else if (analysisFilter === 'warning') filtered = allResults.filter(function(r){ return r.severity==='critical'||r.severity==='warning'; });
+  else if (analysisFilter === 'warning') filtered = allResults.filter(function(r){ return r.severity==='warning'; });
 
   const nCritical = allResults.filter(function(r){ return r.severity==='critical'; }).length;
   const nWarning  = allResults.filter(function(r){ return r.severity==='warning'; }).length;
