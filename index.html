@@ -490,6 +490,50 @@ body.mobile .search-box{width:100%}
 /* フィルターボタンの改善 */
 .analysis-filter-btn{transition:all .15s}
 .analysis-filter-btn:hover:not(.active){border-color:#667eea;color:#667eea}
+
+/* ============================================================
+   Phase 1: 状態ラベル（優先度×危険度の組み合わせから1ワード判定）
+   - 既存の .prog-* ラベルとは別軸。カード右上等に表示する小チップ
+============================================================ */
+.status-chip{display:inline-block;font-size:10px;font-weight:700;padding:2px 7px;border-radius:4px;margin-left:6px;white-space:nowrap;letter-spacing:.2px;vertical-align:middle}
+.status-critical  {background:#fee2e2;color:#991b1b}
+.status-structural{background:#fed7aa;color:#9a3412}
+.status-growth    {background:#dbeafe;color:#1e40af}
+.status-caution   {background:#fef3c7;color:#92400e}
+.status-over      {background:#fef9c3;color:#854d0e}
+.status-ok        {background:#d1fae5;color:#065f46}
+.status-none      {background:#f3f4f6;color:#9ca3af}
+
+/* ============================================================
+   Phase 1: 危険店舗TOP5 / 優先介入TOP10 セクション
+   - 課題分析ビューの上部に表示する2セクション
+   - 既存の .issue-card 系には触らず独立スタイル
+============================================================ */
+.insight-section{background:#fff;border-radius:14px;border:1.5px solid #eaeaf4;padding:14px 18px 8px;margin-bottom:14px}
+.insight-section.danger  {border-color:#fca5a5}
+.insight-section.priority{border-color:#a5b4fc}
+.insight-section-title{font-size:13px;font-weight:800;color:#1a1a2e;margin-bottom:8px;display:flex;align-items:center;gap:8px;letter-spacing:.3px}
+.insight-section.danger   .insight-section-title{color:#b91c1c}
+.insight-section.priority .insight-section-title{color:#4338ca}
+.insight-section-sub{font-size:11px;font-weight:500;color:#999;margin-left:6px}
+.insight-row{display:grid;grid-template-columns:32px 1fr auto auto;gap:12px;align-items:center;padding:8px 8px;border-bottom:1px solid #f0f0f8;font-size:13px;cursor:pointer;transition:background .15s}
+.insight-row:last-child{border-bottom:none}
+.insight-row:hover{background:#fafafe}
+.insight-rank{font-weight:800;color:#9ca3af;font-size:13px;text-align:center}
+.insight-rank.r1{color:#f59e0b;font-size:16px}
+.insight-rank.r2{color:#94a3b8;font-size:15px}
+.insight-rank.r3{color:#b45309;font-size:15px}
+.insight-store{font-weight:700;color:#1a1a2e;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px}
+.insight-person{font-size:10px;color:#888;margin-top:2px}
+.insight-reason{font-size:11px;color:#888;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:right}
+.insight-score{font-size:14px;font-weight:800;padding:4px 10px;border-radius:6px;min-width:46px;text-align:center}
+.insight-score.danger  {background:#fee2e2;color:#991b1b}
+.insight-score.priority{background:#e0e7ff;color:#3730a3}
+.insight-empty{padding:18px;text-align:center;color:#aaa;font-size:12px}
+@media(max-width:600px){
+  .insight-row{grid-template-columns:28px 1fr auto;gap:8px}
+  .insight-reason{display:none}
+}
 </style>
 </head>
 <body>
@@ -573,6 +617,8 @@ body.mobile .search-box{width:100%}
       <button class="type-btn"        id="kbContract" onclick="setKpiSort('new_contract_count')">📋 契約数</button>
       <button class="type-btn"        id="kbPrice"    onclick="setKpiSort('new_contract_unit_price')">💎 契約単価</button>
       <button class="type-btn"        id="kbRate"     onclick="setKpiSort('new_contract_rate')">📈 契約率</button>
+      <!-- Phase 1: 優先度ソート（改善余地×売上インパクト×HQ利益弾性で算出） -->
+      <button class="type-btn"        id="kbPriority" onclick="setKpiSort('priority')">🚨 優先度</button>
     </div>
   </div>
 
@@ -769,6 +815,24 @@ body.mobile .search-box{width:100%}
           <button class="analysis-filter-btn" id="afWarning" onclick="setAnalysisFilter('warning')">🟡 注意</button>
           <span class="ai-badge" id="aiBadge" style="display:none">✨ AI診断 準備中</span>
         </div>
+      </div>
+
+      <!-- Phase 1: 危険店舗TOP5 / 優先介入TOP10
+           - buildStoreInsight() の出力をソートして上位を表示
+           - 担当者・直営/加盟フィルター連動 -->
+      <div id="insightDangerSection" class="insight-section danger" style="display:none">
+        <div class="insight-section-title">
+          🚨 危険店舗 TOP5
+          <span class="insight-section-sub">着地未達・前月比悪化・来店途絶</span>
+        </div>
+        <div id="insightDangerBody"></div>
+      </div>
+      <div id="insightPrioritySection" class="insight-section priority" style="display:none">
+        <div class="insight-section-title">
+          🎯 優先介入 TOP10
+          <span class="insight-section-sub">改善余地 × 売上インパクト × HQ利益弾性</span>
+        </div>
+        <div id="insightPriorityBody"></div>
       </div>
 
       <!-- サマリーバー -->
@@ -1086,6 +1150,323 @@ function projBadgeCls(rate) {
   return 'bad';
 }
 
+/* ============================================================
+ *  Phase 1: 店舗インサイト
+ *  =====================================================
+ *  「優先度」「危険度」「状態ラベル」を1つの純粋関数で生成
+ *
+ *  設計思想：
+ *   - 優先度 = 改善余地 × 売上インパクト × HQ利益弾性
+ *             → 本部リソースを投下したときの期待リターン
+ *   - 危険度 = 着地未達 + 前月比悪化 + 来店途絶
+ *             → 今この瞬間どれだけヤバいか
+ *   - 両者は別軸。同じ店舗が両方高ければ「最優先」
+ *
+ *  Phase 2 以降の拡張ポイント（既存構造を壊さず差し替え可能）：
+ *   - HQ_ROYALTY_COEF: marginalRoyaltyRate() による厳密化
+ *   - LTV_MULTIPLIER : オーナー資金力・出店意欲を反映
+ *   - Headroom拡張   : ベッド数・予約枠消化率・HPB順位
+ * ============================================================ */
+
+/* ── 優先度の重み（合計1.0が望ましいが厳密ではない）──
+ *  社の最優先テーマは「全国の新規数底上げ」なので、新規未達に最大重みを置く */
+const PRIORITY_WEIGHTS = {
+  new:   0.6,  // 新規未達率（最重要）
+  sales: 0.2,  // 売上未達率（結果指標）
+  rate:  0.2,  // 契約率未達率（クロージング）
+};
+
+/* ── 危険度の重み ── */
+const DANGER_WEIGHTS = {
+  sales:      0.35,  // 売上着地の落ち込み
+  new:        0.35,  // 新規着地の落ち込み
+  momentum:   0.20,  // 前月比悪化（新規数ベース）
+  last_visit: 0.10,  // 来店途絶（last_date経過日数）
+};
+
+/* ── HQ利益弾性係数（Phase 1: 簡易2区分）──
+ *  Phase 2 で marginalRoyaltyRate(currentSales, pattern) による厳密化を予定。
+ *  固定パターンでも関係維持・将来加盟価値があるため完全0にはしない。 */
+const HQ_ROYALTY_COEF_FIXED   = 0.25;  // 固定8.8万円 / 6.6万円 / 5.5万円
+const HQ_ROYALTY_COEF_LOW     = 0.50;  // 売上5〜8% / 40万・55万・90万基準系
+const HQ_ROYALTY_COEF_MID     = 0.70;  // 売上10% / 10%+4.4万円
+const HQ_ROYALTY_COEF_HIGH    = 0.90;  // 売上15% / 段階制
+const HQ_ROYALTY_COEF_DIRECT  = 1.00;  // 直営（全利益が本部）
+const HQ_ROYALTY_COEF_DEFAULT = 0.60;  // パターン不明時のフォールバック
+
+/* ── 売上インパクトの基準（円）──
+ *  「目標売上100万円 = インパクト1.0」を基準にする。
+ *  上限を1.0でキャップして小型店との比較を安定化、表示も0-100に収まる。 */
+const SALES_IMPACT_BASELINE = 1000000;
+const SALES_IMPACT_CAP      = 1.0;
+
+/* ── 状態ラベルのしきい値 ── */
+const STATUS_THRESHOLDS = {
+  danger_high:   55,  // 危険度これ以上 = 危険ゾーン
+  danger_mid:    30,  // これ以上 = 注意
+  priority_high: 40,  // 優先度これ以上 = 介入候補
+  over_rate:     110, // 売上着地率これ以上 = 突破
+};
+
+/* ============================================================
+ *  HQ利益弾性係数を取得
+ *    pattern   : 店舗一覧E列のロイヤリティパターン文字列
+ *    storeType : '直営' or '加盟'
+ *  既存 calcRoyalty() の正規表現に準拠した判定
+ * ============================================================ */
+function getHqValueCoef(pattern, storeType) {
+  // 直営は全利益が本部に入る
+  if (storeType === '直営') return HQ_ROYALTY_COEF_DIRECT;
+  if (!pattern) return HQ_ROYALTY_COEF_DEFAULT;
+  const p = pattern.toString().trim();
+  if (/固定/.test(p)) return HQ_ROYALTY_COEF_FIXED;
+  if (/15[%％]/.test(p)) return HQ_ROYALTY_COEF_HIGH;
+  if (/段階/.test(p) || (/70万/.test(p) && /85万/.test(p))) return HQ_ROYALTY_COEF_HIGH;
+  if (/10[%％]/.test(p)) return HQ_ROYALTY_COEF_MID;
+  if (/8[%％]/.test(p))  return HQ_ROYALTY_COEF_LOW;
+  if (/5[%％]/.test(p))  return HQ_ROYALTY_COEF_LOW;
+  // 各種基準制（売上が閾値未満時は固定、超えると変動）
+  if (/90万/.test(p) || /55万/.test(p) || /40万/.test(p)) return HQ_ROYALTY_COEF_LOW;
+  return HQ_ROYALTY_COEF_DEFAULT;
+}
+
+/* ============================================================
+ *  売上インパクト係数（目標売上 → 0..SALES_IMPACT_CAP）
+ * ============================================================ */
+function getSalesImpact(targetSales) {
+  if (!targetSales || targetSales <= 0) return 0;
+  return Math.min(targetSales / SALES_IMPACT_BASELINE, SALES_IMPACT_CAP);
+}
+
+/* ============================================================
+ *  ギャップ率（着地見込ベース、0..1）
+ *  target 100% としたときの足りない割合
+ *    actual >= target → 0  /  actual == 0 → 1
+ * ============================================================ */
+function getGapRate(projected, target) {
+  if (!target || target <= 0) return 0;
+  if (projected == null) return 0;
+  const gap = (target - projected) / target;
+  if (gap < 0) return 0;
+  if (gap > 1) return 1;
+  return gap;
+}
+
+/* ============================================================
+ *  指標の「着地見込値」を返す
+ *   - 過去月 → 実績そのまま（確定値）
+ *   - 当月+last_dateあり → calcProjection で線形按分
+ *   - 当月+last_dateなし → 実績そのまま（早期段階は不安定なので見込みは出さない）
+ * ============================================================ */
+function projectValue(actualVal, lastDate, month, isCurrentMonth) {
+  if (!isCurrentMonth) return actualVal || 0;
+  if (!lastDate || !actualVal) return actualVal || 0;
+  const proj = calcProjection(actualVal, lastDate, month, 0);
+  return proj ? proj.projection : (actualVal || 0);
+}
+
+/* ============================================================
+ *  YYYYMM の前月を返す
+ * ============================================================ */
+function getPrevMonth(yyyymm) {
+  const y = parseInt(yyyymm.slice(0,4));
+  const m = parseInt(yyyymm.slice(4,6));
+  if (m === 1) return (y-1) + '12';
+  return y + ('0' + (m-1)).slice(-2);
+}
+
+/* ============================================================
+ *  対象月が「今月」かどうか
+ * ============================================================ */
+function isCurrentYYYYMM(yyyymm) {
+  const now = new Date();
+  const cur = now.getFullYear() + ('0' + (now.getMonth()+1)).slice(-2);
+  return yyyymm === cur;
+}
+
+/* ============================================================
+ *  last_date（YYYY-MM-DD）から今日までの経過日数
+ *  当月以外は意味を持たないので null を返す
+ * ============================================================ */
+function getDaysSinceLastVisit(lastDate, isCurrentMonth) {
+  if (!isCurrentMonth || !lastDate) return null;
+  const d = new Date(lastDate);
+  if (isNaN(d.getTime())) return null;
+  const now = new Date();
+  const diff = Math.floor((now - d) / (1000 * 60 * 60 * 24));
+  return Math.max(0, diff);
+}
+
+/* ============================================================
+ *  経過日数 → 0..1 のリスク値
+ *  3日以内: 0 / 7日: 〜0.22 / 14日: 〜0.61 / 21日以上: 1.0
+ * ============================================================ */
+function lastVisitRisk(days) {
+  if (days == null) return 0;
+  if (days <= 3) return 0;
+  if (days >= 21) return 1;
+  return Math.min(1, (days - 3) / 18);
+}
+
+/* ============================================================
+ *  状態ラベル分類（priority / danger は 0..100）
+ *  ※ 突破（着地110%超）は最優先で判定
+ * ============================================================ */
+function classifyStatus(priority, danger, projectedSalesRate) {
+  if (priority == null && danger == null) {
+    return { key:'none', emoji:'⚪', label:'データ不足' };
+  }
+  const p = priority || 0;
+  const d = danger || 0;
+  const T = STATUS_THRESHOLDS;
+
+  if (projectedSalesRate != null && projectedSalesRate >= T.over_rate) {
+    return { key:'over', emoji:'🚀', label:'突破' };
+  }
+  if (d >= T.danger_high && p >= T.priority_high) {
+    return { key:'critical', emoji:'🔥', label:'最優先' };
+  }
+  if (d >= T.danger_high) {
+    return { key:'structural', emoji:'⚠️', label:'構造課題' };
+  }
+  if (p >= T.priority_high) {
+    return { key:'growth', emoji:'💎', label:'攻め枠' };
+  }
+  if (d >= T.danger_mid) {
+    return { key:'caution', emoji:'🟡', label:'注意' };
+  }
+  return { key:'ok', emoji:'🟢', label:'順調' };
+}
+
+/* ============================================================
+ *  メイン：店舗インサイトを生成する純粋関数
+ *  ------------------------------------------------------------
+ *  引数：
+ *    store : 略称
+ *    month : 対象月 'YYYYMM'
+ *  返り値：
+ *    {
+ *      priority:        Number|null   // 0-100
+ *      danger:          Number|null   // 0-100
+ *      status:          { key, emoji, label }
+ *      projection_rate: Number|null   // 売上着地率(%)
+ *      reasons:         [String]      // 説明文（UI表示用）
+ *      breakdown:       { newGap, salesGap, rateGap, gapScore,
+ *                         salesImpact, hqCoef,
+ *                         salesRisk, newRisk, momentum, lastVisitDays }
+ *    }
+ *  副作用なし。同じ入力に対して常に同じ出力。
+ * ============================================================ */
+function buildStoreInsight(store, month) {
+  const monthData = (DATA.data && DATA.data[month]) ? DATA.data[month] : {};
+  const actual    = monthData[store];
+  const target    = (DATA.targets && DATA.targets[store] && DATA.targets[store][month]) || null;
+  const isCurrent = isCurrentYYYYMM(month);
+
+  // 実績なし → 計算不能
+  if (!actual) {
+    return {
+      priority: null, danger: null,
+      status: { key:'none', emoji:'⚪', label:'データなし' },
+      projection_rate: null, reasons: [], breakdown: {}
+    };
+  }
+
+  // ── 着地見込（当月のみ。過去月は実績そのまま）─────────
+  const projSales = projectValue(actual.total_sales, actual.last_date, month, isCurrent);
+  const projNew   = projectValue(actual.new_count,   actual.last_date, month, isCurrent);
+  // 契約率・単価は見込み計算が暴れやすいので実績値をそのまま使用
+  const projRate  = actual.new_contract_rate || 0;
+
+  // ── 売上着地率（％）──────────────────────────────
+  const projSalesRate = (target && target.total_sales > 0)
+    ? Math.round(projSales / target.total_sales * 100)
+    : null;
+
+  // ── 優先度スコア（0-100）─────────────────────────
+  let priority = null;
+  const breakdown = {};
+  if (target) {
+    const newGap   = getGapRate(projNew,   target.new_count);
+    const salesGap = getGapRate(projSales, target.total_sales);
+    const rateGap  = getGapRate(projRate,  target.new_contract_rate);
+    const PW = PRIORITY_WEIGHTS;
+    const gapScore = newGap * PW.new + salesGap * PW.sales + rateGap * PW.rate;  // 0-1
+    const salesImpact = getSalesImpact(target.total_sales);                       // 0-1
+    const hqCoef = getHqValueCoef(
+      DATA.store_royalty_pattern ? DATA.store_royalty_pattern[store] : '',
+      DATA.store_type            ? DATA.store_type[store]            : ''
+    );
+    priority = Math.round(gapScore * salesImpact * hqCoef * 100);                 // 0-100
+    breakdown.newGap = newGap;
+    breakdown.salesGap = salesGap;
+    breakdown.rateGap = rateGap;
+    breakdown.gapScore = gapScore;
+    breakdown.salesImpact = salesImpact;
+    breakdown.hqCoef = hqCoef;
+  }
+
+  // ── 危険度スコア（0-100）─────────────────────────
+  // 目標未設定でも当月なら来店途絶チェックだけ走らせる
+  let danger = null;
+  if (target || isCurrent) {
+    const DW = DANGER_WEIGHTS;
+
+    // 着地リスク（着地率が低いほど高い）
+    const salesRisk = (target && target.total_sales > 0)
+      ? Math.min(1, Math.max(0, 1 - projSales / target.total_sales))
+      : 0;
+    const newRisk = (target && target.new_count > 0)
+      ? Math.min(1, Math.max(0, 1 - projNew / target.new_count))
+      : 0;
+
+    // 前月比悪化（新規数ベース。プラスの場合のみリスク化）
+    const prevMonth = getPrevMonth(month);
+    const prevData  = (DATA.data && DATA.data[prevMonth]) ? DATA.data[prevMonth][store] : null;
+    let momentum = 0;
+    if (prevData && prevData.new_count > 0) {
+      const drop = (prevData.new_count - projNew) / prevData.new_count;
+      if (drop > 0) momentum = Math.min(1, drop);
+    }
+
+    // 来店途絶（当月のみ意味あり）
+    const days = getDaysSinceLastVisit(actual.last_date, isCurrent);
+    const visitRisk = lastVisitRisk(days);
+
+    danger = Math.round((
+      salesRisk * DW.sales +
+      newRisk   * DW.new +
+      momentum  * DW.momentum +
+      visitRisk * DW.last_visit
+    ) * 100);
+
+    breakdown.salesRisk = salesRisk;
+    breakdown.newRisk = newRisk;
+    breakdown.momentum = momentum;
+    breakdown.lastVisitDays = days;
+  }
+
+  // ── 状態ラベル ───────────────────────────────────
+  const status = classifyStatus(priority, danger, projSalesRate);
+
+  // ── 説明文（UI表示用、最も効きの強い順）──────────────
+  const reasons = [];
+  if (target && projSalesRate != null && projSalesRate < 70) {
+    reasons.push('売上着地' + projSalesRate + '%');
+  }
+  if (target && breakdown.newGap != null && breakdown.newGap > 0.3) {
+    reasons.push('新規' + Math.round(breakdown.newGap * 100) + '%未達');
+  }
+  if (breakdown.momentum != null && breakdown.momentum > 0.2) {
+    reasons.push('前月比-' + Math.round(breakdown.momentum * 100) + '%');
+  }
+  if (breakdown.lastVisitDays != null && breakdown.lastVisitDays >= 7) {
+    reasons.push(breakdown.lastVisitDays + '日来店なし');
+  }
+
+  return { priority, danger, status, projection_rate: projSalesRate, reasons, breakdown };
+}
+
 // 店舗名の表示用略称を返す（略称なければフル名をそのまま返す）
 function dispName(fullName){return(DATA.store_short&&DATA.store_short[fullName])||fullName;}
 // DATA.dataの全月から店舗リストを再構築（BM店舗など動的追加に対応）
@@ -1186,6 +1567,13 @@ function renderList(){
     if(curStoreType!=='全店舗'&&DATA.store_type[s]!==curStoreType)return false;
     return true;
   });
+  // Phase 1: インサイトの計算結果を1回の renderList 中でキャッシュ
+  //   優先度ソート時は sort 中に何度も呼ばれるため、ここでメモ化
+  const _insightCache = {};
+  const getInsight = (s) => {
+    if (!(s in _insightCache)) _insightCache[s] = buildStoreInsight(s, curMonth);
+    return _insightCache[s];
+  };
   // curKpiに応じてソート
   const getKpiVal = (s) => {
     if (!md[s]) return -1;
@@ -1194,6 +1582,11 @@ function renderList(){
     if (curKpi === 'new_contract_count') return md[s].new_contract_count || 0;
     if (curKpi === 'new_contract_unit_price') return md[s].new_contract_unit_price || 0;
     if (curKpi === 'new_contract_rate') return md[s].new_contract_rate || 0;
+    if (curKpi === 'priority') {
+      // Phase 1: 優先度ソート（priority が null の店舗は末尾に）
+      const ins = getInsight(s);
+      return ins.priority != null ? ins.priority : -1;
+    }
     return md[s].total_sales || 0;
   };
   allStores.sort((a,b) => kpiSortOrder === 'desc'
@@ -1291,8 +1684,15 @@ function renderList(){
         '</div>';
       };
 
+      // Phase 1: \u72b6\u614b\u30e9\u30d9\u30eb\uff08\u512a\u5148\u5ea6\u00d7\u5371\u967a\u5ea6\u304b\u3089\u5224\u5b9a\uff09
+      const _ins = getInsight(s);
+      const statusChipHtml = (_ins && _ins.status && _ins.status.key !== 'none')
+        ? '<span class="status-chip status-'+_ins.status.key+'" title="\u512a\u5148\u5ea6:'+(_ins.priority||0)+' / \u5371\u967a\u5ea6:'+(_ins.danger||0)+'">'
+          + _ins.status.emoji + ' ' + _ins.status.label + '</span>'
+        : '';
+
       card.innerHTML=
-        '<div class="card-header"><div class="card-name">'+rankBadgeHtml+dispName(s)+typeBadge+'</div>'+personBadge+'</div>'+
+        '<div class="card-header"><div class="card-name">'+rankBadgeHtml+dispName(s)+typeBadge+statusChipHtml+'</div>'+personBadge+'</div>'+
         '<div class="card-arrow">\u203a</div>'+
         (curKpi === 'total_sales' ?
           // 通常表示（売上モード）
@@ -1755,14 +2155,16 @@ function setKpiSort(kpi) {
     new_count: 'kbNew',
     new_contract_count: 'kbContract',
     new_contract_unit_price: 'kbPrice',
-    new_contract_rate: 'kbRate'
+    new_contract_rate: 'kbRate',
+    priority: 'kbPriority'  // Phase 1: 優先度ソート
   };
   const labels = {
     total_sales: '💰 売上',
     new_count: '👤 新規数',
     new_contract_count: '📋 契約数',
     new_contract_unit_price: '💎 契約単価',
-    new_contract_rate: '📈 契約率'
+    new_contract_rate: '📈 契約率',
+    priority: '🚨 優先度'    // Phase 1: 優先度ソート
   };
   Object.keys(map).forEach(k => {
     const el = document.getElementById(map[k]);
@@ -2237,10 +2639,136 @@ function renderRanking() {
 }
 
 // 課題分析ビューをレンダリング
+/* ============================================================
+ *  Phase 1: 危険店舗TOP5 / 優先介入TOP10 のレンダリング
+ *  ------------------------------------------------------------
+ *  renderAnalysis() の冒頭から呼び出される。
+ *  担当者・直営/加盟フィルターを既存と同じロジックで適用。
+ *  既存の analysisSummary / issueCards には触らない。
+ * ============================================================ */
+function renderInsightTops(month) {
+  const monthData = (DATA.data && DATA.data[month]) ? DATA.data[month] : {};
+
+  // 既存と同じフィルター（担当者・直営/加盟）
+  const stores = DATA.stores.filter(function(s) {
+    if (!monthData[s]) return false;
+    if (curPerson !== '全店舗' && DATA.store_person && DATA.store_person[s] !== curPerson) return false;
+    if (curStoreType !== '全店舗' && DATA.store_type && DATA.store_type[s] !== curStoreType) return false;
+    return true;
+  });
+
+  // インサイト計算（メモ化）
+  const insights = stores.map(function(s) {
+    return { store: s, insight: buildStoreInsight(s, month) };
+  });
+
+  // 危険TOP5（danger != null かつ > 0 の店舗を降順）
+  const dangerSorted = insights
+    .filter(function(x) { return x.insight.danger != null && x.insight.danger > 0; })
+    .sort(function(a, b) { return b.insight.danger - a.insight.danger; })
+    .slice(0, 5);
+
+  // 優先TOP10（priority != null かつ > 0 の店舗を降順）
+  const prioritySorted = insights
+    .filter(function(x) { return x.insight.priority != null && x.insight.priority > 0; })
+    .sort(function(a, b) { return b.insight.priority - a.insight.priority; })
+    .slice(0, 10);
+
+  // 危険セクション
+  const dSec  = document.getElementById('insightDangerSection');
+  const dBody = document.getElementById('insightDangerBody');
+  if (dSec && dBody) {
+    if (dangerSorted.length > 0) {
+      dSec.style.display = '';
+      dBody.innerHTML = dangerSorted.map(function(x, i) {
+        return insightRowHtml(x, i, 'danger');
+      }).join('');
+      // クリックで詳細遷移（HTML属性へのエスケープ問題を避けるためaddEventListenerで紐付け）
+      bindInsightRowClicks(dBody, dangerSorted);
+    } else {
+      dSec.style.display = 'none';
+      dBody.innerHTML = '';
+    }
+  }
+
+  // 優先セクション
+  const pSec  = document.getElementById('insightPrioritySection');
+  const pBody = document.getElementById('insightPriorityBody');
+  if (pSec && pBody) {
+    if (prioritySorted.length > 0) {
+      pSec.style.display = '';
+      pBody.innerHTML = prioritySorted.map(function(x, i) {
+        return insightRowHtml(x, i, 'priority');
+      }).join('');
+      bindInsightRowClicks(pBody, prioritySorted);
+    } else {
+      pSec.style.display = 'none';
+      pBody.innerHTML = '';
+    }
+  }
+}
+
+/* ── インサイト行のHTMLを生成 ── */
+function insightRowHtml(x, idx, kind) {
+  const rank = idx + 1;
+  const rankCls = rank <= 3 ? ' r' + rank : '';
+  const person  = DATA.store_person ? (DATA.store_person[x.store] || '') : '';
+  const personHtml = person ? '<div class="insight-person">担当: ' + escHtml(person) + '</div>' : '';
+  const score   = kind === 'danger' ? x.insight.danger : x.insight.priority;
+  const reason  = (x.insight.reasons || []).slice(0, 2).join(' / ');
+  const emoji   = x.insight.status ? x.insight.status.emoji : '';
+  return '<div class="insight-row" data-idx="' + idx + '">'
+       +   '<div class="insight-rank' + rankCls + '">' + rank + '</div>'
+       +   '<div>'
+       +     '<div class="insight-store">' + emoji + ' ' + escHtml(dispName(x.store)) + '</div>'
+       +     personHtml
+       +   '</div>'
+       +   '<div class="insight-reason">' + escHtml(reason) + '</div>'
+       +   '<div class="insight-score ' + kind + '">' + score + '</div>'
+       + '</div>';
+}
+
+/* ── 行クリックで詳細ビューへ遷移 ── */
+function bindInsightRowClicks(container, sortedItems) {
+  container.querySelectorAll('.insight-row').forEach(function(row) {
+    const idx = parseInt(row.getAttribute('data-idx'), 10);
+    const item = sortedItems[idx];
+    if (!item) return;
+    row.addEventListener('click', function() {
+      goToStoreDetail(item.store);
+    });
+  });
+}
+
+/* ── 任意店舗の詳細ビューへ遷移するヘルパー ── */
+function goToStoreDetail(store) {
+  const d = (DATA.data && DATA.data[curMonth]) ? DATA.data[curMonth][store] : null;
+  const tgt = (DATA.targets && DATA.targets[store] && DATA.targets[store][curMonth]) || null;
+  if (d && typeof showDetail === 'function') {
+    // 店舗一覧タブに切り替えてから詳細を出す（課題分析タブから飛ぶケース）
+    switchMainTab('store');
+    showDetail(store, d, tgt);
+  }
+}
+
+/* ── HTMLエスケープ（店舗名・担当者名に[]｜などが含まれるため安全側に倒す）── */
+function escHtml(s) {
+  if (s == null) return '';
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 function renderAnalysis() {
   const month = curMonth;
   const monthData = (DATA.data && DATA.data[month]) ? DATA.data[month] : {};
   const targets = DATA.targets || {};
+
+  // Phase 1: 危険店舗TOP5 / 優先介入TOP10 を先に描画（既存サマリーには非干渉）
+  renderInsightTops(month);
 
   const allResults = [];
   DATA.stores.forEach(function(store) {
