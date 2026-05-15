@@ -216,9 +216,10 @@ body{font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP','Yu Gothic',sans-ser
 /* 共通目標セクション */
 .direct-common-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px;margin-top:4px}
 .direct-common-card{background:#f7f7fc;border-radius:10px;padding:12px 14px}
-@media(max-width:600px){.menu-break-grid{grid-template-columns:1fr}}
+/* menu-break-grid は ≤640px統合ブロック側で 1fr に切替 */
 
-/* MOBILE */
+/* MOBILE — body.mobile（手動SP切替）用の最小override
+   ※ ≤640px向けのスタイル本体はファイル末尾の統合ブロックを参照 */
 body.mobile .cards-grid{grid-template-columns:1fr}
 body.mobile .detail-kpis{grid-template-columns:repeat(2,1fr)}
 body.mobile .detail-kpis-2{grid-template-columns:repeat(2,1fr)}
@@ -226,14 +227,10 @@ body.mobile .kgi-actual{font-size:26px}
 body.mobile .header-inner{padding:0 12px;gap:10px}
 body.mobile .main{padding:12px}
 body.mobile .search-box{width:100%}
-@media(max-width:640px){
-  .cards-grid{grid-template-columns:1fr}
-  .detail-kpis{grid-template-columns:repeat(2,1fr)}
-  .detail-kpis-2{grid-template-columns:repeat(2,1fr)}
-  .kgi-actual{font-size:26px}
-  .search-box{width:100%}
-  .person-bar{padding:0 12px}
-}
+body.mobile .ai-summary-bar{grid-template-columns:repeat(3,1fr);gap:8px}
+body.mobile .ai-priority-grid{grid-template-columns:1fr}
+body.mobile .ai-alerts-grid{grid-template-columns:1fr}
+body.mobile .analysis-summary{grid-template-columns:repeat(4,1fr);gap:6px}
 
 /* ===== YEAR TABS ===== */
 .year-tabs{display:flex;gap:3px}
@@ -435,11 +432,10 @@ body.mobile .search-box{width:100%}
 .sum-box.warning .sum-num{color:#f59e0b}
 .sum-label{font-size:10px;color:#aaa;font-weight:600;margin-top:3px}
 
+/* issue-kpi-grid / competitor-grid / analysis-summary / issue-card-header
+   の ≤640px override はファイル末尾の統合モバイルブロック側で集約管理 */
 @media(max-width:640px){
-  .issue-kpi-grid{grid-template-columns:repeat(2,1fr)}
   .competitor-grid{grid-template-columns:1fr}
-  .analysis-summary{grid-template-columns:repeat(2,1fr)}
-  .issue-card-header{flex-wrap:wrap}
 }
 
 /* ===== 課題分析 デザイン改善 ===== */
@@ -547,8 +543,9 @@ body.mobile .search-box{width:100%}
 .insight-breakdown .bd-value{color:#1a1a2e;font-weight:700}
 .insight-detail-btn{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;transition:opacity .15s}
 .insight-detail-btn:hover{opacity:.88}
-@media(max-width:600px){
-  .insight-row{grid-template-columns:28px 1fr auto auto;gap:8px}
+/* insight-row の ≤640px override は統合モバイルブロック側で管理
+   ＋ 重要：右端の理由テキストは狭幅で隠す */
+@media(max-width:640px){
   .insight-reason{display:none}
 }
 
@@ -587,7 +584,7 @@ body.mobile .search-box{width:100%}
 .ai-sum-card.critical .ai-sum-bar-fill{background:#ef4444}
 .ai-sum-card.warning .ai-sum-bar-fill{background:#f59e0b}
 .ai-sum-card.stable .ai-sum-bar-fill{background:#10b981}
-@media(max-width:640px){.ai-summary-bar{grid-template-columns:1fr}}
+/* .ai-summary-bar の ≤640px override は統合モバイルブロックで repeat(3,1fr) */
 
 /* AI重点店舗カードグリッド */
 .ai-priority-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:14px}
@@ -647,10 +644,7 @@ body.mobile .search-box{width:100%}
 .ai-know-item::before{content:'›';margin-right:5px;font-weight:700;color:#a78bfa}
 .ai-know-item.unavailable::before{color:#cbd5e1}
 
-@media(max-width:640px){
-  .ai-priority-grid{grid-template-columns:1fr}
-  .ai-metric-grid{grid-template-columns:repeat(3,1fr)}
-}
+/* .ai-priority-grid / .ai-metric-grid の ≤640px override は統合モバイルブロックで管理 */
 
 /* AIアラート */
 .ai-alerts-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px}
@@ -673,6 +667,246 @@ body.mobile .search-box{width:100%}
 .ai-badge.live::before{content:'';display:inline-block;width:6px;height:6px;border-radius:50%;background:#7c3aed;margin-right:4px;box-shadow:0 0 8px rgba(124,58,237,.7)}
 
 .ai-empty{padding:20px;text-align:center;color:#aaa;font-size:12px;background:#fafafe;border-radius:10px;border:1px dashed #e0e0ec}
+
+/* ============================================================
+   MOBILE OPTIMIZATION — 統合モバイル最適化（≤640px）
+   ─ 既存scattered media指定を後勝ちで上書き
+   ─ AI分析セクションをモバイルファーストに再設計
+   ─ Linear/Notion/Stripe風の整理感／密度／視線誘導
+   ─ #667eea / #764ba2 トーンを維持
+============================================================ */
+@media(max-width:640px){
+  /* === BASE / TYPOGRAPHY === */
+  body{font-size:13px}
+  .main{padding:14px 12px 24px}
+
+  /* === HEADER === */
+  .header-inner{padding:0 12px;gap:8px;height:54px}
+  .brand{gap:8px}
+  .brand-logo{width:30px;height:30px;font-size:14px;border-radius:7px}
+  .brand-name{font-size:13.5px}
+  .brand-sub{font-size:10px}
+  .refresh-btn{padding:5px 9px;font-size:11px;border-radius:7px;white-space:nowrap}
+  .target-loaded-badge{font-size:10px;padding:2px 7px}
+  .view-switch{padding:2px}
+  .vs-btn{padding:5px 10px;font-size:11px}
+  .month-tab{padding:6px 12px;font-size:12px}
+  .year-tab{padding:5px 10px;font-size:11px}
+
+  /* === MAIN NAV === */
+  .main-nav{padding:0 4px}
+  .main-nav-inner{overflow-x:auto;scrollbar-width:none}
+  .main-nav-inner::-webkit-scrollbar{display:none}
+  .nav-tab{padding:11px 14px;font-size:12.5px;flex-shrink:0}
+
+  /* === FILTER BARS === */
+  .person-bar{padding:0 12px}
+  .person-btn{padding:6px 12px;font-size:11.5px;min-height:32px}
+  .type-bar{padding:0 12px}
+  .type-bar-inner{height:36px}
+  .type-btn{padding:5px 12px;font-size:11.5px;min-height:30px}
+
+  /* === BREADCRUMB === */
+  .breadcrumb{padding:10px 12px 0;font-size:12px}
+
+  /* === LIST HEADER === */
+  .list-header{margin-bottom:12px;gap:10px}
+  .list-title{font-size:18px}
+  .list-meta{font-size:11.5px}
+  .total-chip{font-size:11px;padding:3px 10px}
+
+  /* === ANALYSIS HEADER === */
+  .analysis-header{margin-bottom:14px;gap:8px;align-items:flex-start}
+  .analysis-title{font-size:18px}
+  .analysis-meta{font-size:11.5px}
+  .analysis-controls{gap:6px;width:100%;flex-wrap:wrap}
+  .analysis-filter-btn{padding:6px 13px;font-size:12px;min-height:32px;border-radius:18px}
+  .ai-badge{font-size:10.5px;padding:4px 10px}
+
+  /* === AI SECTION COMMON === */
+  .ai-section{margin-bottom:14px}
+  .ai-section-title{font-size:12.5px;gap:6px;margin-bottom:8px;align-items:center;flex-wrap:wrap;letter-spacing:.2px}
+  .ai-section-title .ai-mark{width:20px;height:20px;font-size:10px;border-radius:5px}
+  .ai-section-sub{font-size:10px;margin-left:4px;color:#aaa}
+  .ai-updated-at{font-size:10px;margin-left:auto;flex-shrink:0}
+
+  /* === AI SUMMARY CARDS（Critical/Warning/Stable）=== */
+  /* 横3カラム圧縮 — 1スクリーンで全店舗ステータスを把握 */
+  .ai-summary-bar{grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+  .ai-sum-card{padding:11px 10px 10px 14px;border-radius:10px}
+  .ai-sum-card::before{width:3px}
+  .ai-sum-label{font-size:9px;letter-spacing:.6px;margin-bottom:4px;line-height:1.2}
+  .ai-sum-num-row{gap:3px;flex-wrap:wrap;align-items:baseline}
+  .ai-sum-num{font-size:22px;letter-spacing:-.3px}
+  .ai-sum-unit{font-size:10.5px}
+  .ai-sum-caption{font-size:9.5px;margin-top:3px;line-height:1.35;color:#999}
+  .ai-sum-bar{margin-top:7px;height:3px}
+
+  /* === AI PRIORITY STORE CARDS（重点店舗）=== */
+  /* モバイルファースト：店舗名最優先・severity chip可視化・KPI密度UP */
+  .ai-priority-grid{grid-template-columns:1fr;gap:10px}
+  .ai-store-card{padding:14px 14px 14px 18px;border-radius:12px}
+  .ai-store-card::before{width:4px}
+  .ai-store-head{margin-bottom:10px;gap:8px;align-items:center}
+  .ai-store-rank{font-size:9px;letter-spacing:1px;padding:1px 6px;margin-bottom:4px;border-radius:3px}
+  .ai-store-name{font-size:14.5px;line-height:1.3;font-weight:800}
+  .ai-store-owner{font-size:10.5px;margin-top:3px}
+  .ai-priority-chip{font-size:9.5px;padding:3px 10px;letter-spacing:.5px;font-weight:800;border-radius:12px;flex-shrink:0}
+  .ai-main-issue{padding:9px 11px;font-size:11.5px;line-height:1.55;margin-bottom:10px;border-radius:8px}
+  .ai-main-issue-label{font-size:8.5px;margin-bottom:3px;letter-spacing:1px}
+  .ai-metric-grid{grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px}
+  .ai-metric{padding:7px 8px;border-radius:7px}
+  .ai-metric-label{font-size:9px;margin-bottom:2px;letter-spacing:.3px}
+  .ai-metric-val{font-size:13px;line-height:1.1}
+  .ai-metric-unit{font-size:9.5px}
+  .ai-trend{font-size:10.5px;padding:6px 10px;margin-bottom:10px;line-height:1.45;border-radius:6px}
+  .ai-summary-text{font-size:11.5px;margin-bottom:10px;line-height:1.6}
+  .ai-block{margin-bottom:9px}
+  .ai-block-title{font-size:9px;margin-bottom:5px;letter-spacing:.8px;gap:4px}
+  .ai-action-list{gap:4px}
+  .ai-action-item{font-size:11px;padding:6px 9px;border-radius:7px;line-height:1.45;gap:7px}
+  .ai-action-num{width:14px;height:14px;font-size:8.5px}
+  .ai-block.avoid .ai-action-item::before{width:14px;height:14px;font-size:9px}
+  .ai-know-list{gap:3px}
+  .ai-know-item{font-size:10.5px;padding:5px 9px;border-radius:6px;line-height:1.4}
+
+  /* === AI ALERTS（緊急アラート）=== */
+  /* 1列縦積み・1〜2行で概要把握できる密度 */
+  .ai-alerts-grid{grid-template-columns:1fr;gap:8px}
+  .ai-alert-card{padding:10px 12px;gap:9px;border-radius:10px;align-items:flex-start}
+  .ai-alert-dot{width:8px;height:8px;margin-top:5px}
+  .ai-alert-store{font-size:12px;margin-bottom:3px;gap:6px;line-height:1.3;font-weight:800}
+  .ai-alert-severity{font-size:8.5px;padding:1px 5px;letter-spacing:.4px;border-radius:3px}
+  .ai-alert-msg{font-size:10.5px;line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+
+  /* === ANALYSIS SUMMARY（4 boxes：要対応/注意/良好/総数）=== */
+  /* 4カラム圧縮で1スクリーンに収め、テンポよくスクロール */
+  .analysis-summary{grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:14px}
+  .sum-box{padding:10px 6px;border-radius:10px}
+  .sum-num{font-size:20px}
+  .sum-label{font-size:9.5px;margin-top:3px;line-height:1.3}
+
+  /* === INSIGHT TOP（危険店舗/優先介入）=== */
+  .insight-section{padding:12px 14px 6px;border-radius:12px;margin-bottom:12px}
+  .insight-section-title{font-size:12.5px;margin-bottom:6px;gap:6px;align-items:baseline;flex-wrap:wrap}
+  .insight-section-sub{font-size:10px;margin-left:0}
+  .insight-row{padding:9px 4px;font-size:12px;grid-template-columns:24px 1fr auto auto;gap:8px;align-items:center}
+  .insight-rank{font-size:12px}
+  .insight-rank.r1{font-size:14px}
+  .insight-rank.r2,.insight-rank.r3{font-size:13px}
+  .insight-store{font-size:12.5px;font-weight:700}
+  .insight-person{font-size:10px;margin-top:2px}
+  .insight-score{font-size:12.5px;padding:3px 9px;min-width:40px;border-radius:6px}
+  .insight-chevron{font-size:11px;margin-left:2px}
+  .insight-body{padding:10px 6px 12px}
+  .insight-body-grid{grid-template-columns:repeat(2,1fr);gap:6px;margin-bottom:10px}
+  .insight-breakdown{grid-template-columns:repeat(2,1fr);gap:5px;margin-bottom:8px}
+  .insight-reasons-full{font-size:11.5px;padding:9px 11px}
+  .insight-detail-btn{padding:8px 14px;font-size:11.5px;width:100%;justify-content:center}
+
+  /* === ISSUE CARDS（課題カード）=== */
+  .issue-cards{gap:10px}
+  .issue-card{border-radius:12px}
+  .issue-card-header{padding:12px 14px 12px 16px;gap:8px;flex-wrap:wrap}
+  .issue-severity{width:4px;margin:-12px 8px -12px -16px;min-height:46px}
+  .issue-store-name{font-size:13px;line-height:1.35;flex:1;min-width:0}
+  .issue-store-sub{font-size:10.5px}
+  .issue-tags{max-width:none;justify-content:flex-start;width:100%;margin-top:4px;gap:4px}
+  .issue-tag{font-size:9.5px;padding:2px 7px;line-height:1.3}
+  .issue-section{padding:12px 14px}
+  .issue-section-title{font-size:10.5px;margin-bottom:8px;padding-bottom:5px}
+  .issue-kpi-grid{grid-template-columns:repeat(2,1fr);gap:6px}
+  .issue-kpi-box{padding:9px 10px;border-radius:8px}
+  .ikb-actual{font-size:16px}
+  .action-list{gap:6px}
+  .action-item{padding:9px 11px;border-radius:8px;gap:8px}
+  .action-title{font-size:12.5px}
+  .action-desc{font-size:11.5px;line-height:1.5}
+  .action-num{width:18px;height:18px;font-size:10.5px}
+  .competitor-card{padding:9px 11px;border-radius:8px}
+
+  /* === STORE LIST CARDS === */
+  .cards-grid{gap:12px}
+  .store-card{padding:14px 16px;border-radius:12px}
+  .card-name{font-size:13px;line-height:1.35}
+  .card-arrow{top:14px;right:14px;font-size:14px}
+  .card-kgi-actual{font-size:20px}
+  .card-kgi-target{font-size:12px}
+  .card-kpis{gap:6px;padding-top:10px}
+  .ck-actual{font-size:14px}
+
+  /* === TOP3 === */
+  .top3-section{margin-bottom:16px}
+  .top3-grid{gap:10px}
+
+  /* === STATS PANEL === */
+  .stats-panel{padding:14px 14px;border-radius:12px;margin-bottom:12px}
+  .stats-body{gap:8px}
+  .stats-kpi{padding:10px 12px;border-radius:8px}
+  .stats-kpi-avg{font-size:16px}
+
+  /* === DETAIL VIEW === */
+  .detail-store-name{font-size:17px;line-height:1.3}
+  .detail-period{font-size:11.5px;margin-bottom:12px}
+  .kgi-bar{padding:18px 18px;border-radius:14px;margin-bottom:12px}
+  .kgi-actual{font-size:26px}
+  .kgi-target{font-size:18px}
+  .kgi-slash{font-size:18px;margin:0 8px}
+  .detail-section-label{font-size:10.5px;margin-top:12px;margin-bottom:7px}
+  .detail-kpis{grid-template-columns:repeat(2,1fr);gap:8px}
+  .detail-kpis-2{grid-template-columns:repeat(2,1fr);gap:8px}
+  .dkpi{padding:11px 12px;border-radius:10px}
+  .dkpi-actual{font-size:20px}
+  .menu-break-grid{grid-template-columns:1fr;gap:10px}
+  .menu-break-card{padding:12px 14px;border-radius:10px}
+
+  /* === SETTINGS MODAL === */
+  .modal-card{padding:24px 20px;border-radius:14px;width:92%}
+  .modal-title{font-size:16px}
+  .modal-sub{font-size:12px;margin-bottom:16px}
+
+  /* === SEARCH === */
+  .search-box{width:100%;padding:10px 14px 10px 36px;font-size:13px;border-radius:10px}
+
+  /* === EMPTY STATE === */
+  .empty-state{padding:40px 16px}
+  .empty-state-icon{font-size:34px;margin-bottom:8px}
+  .empty-state-text{font-size:13.5px}
+  .empty-state-sub{font-size:11.5px}
+}
+
+/* ============================================================
+   EXTRA SMALL（≤380px）— iPhone SE / 旧Android向け追い込み
+============================================================ */
+@media(max-width:380px){
+  .main{padding:12px 10px 20px}
+  .header-inner{padding:0 10px;gap:6px;height:52px}
+  .brand-sub{display:none}
+
+  /* AIサマリーは縦1列・1行レイアウトに切替 */
+  .ai-summary-bar{grid-template-columns:1fr;gap:6px}
+  .ai-sum-card{display:flex;align-items:center;flex-wrap:wrap;column-gap:10px;row-gap:4px;padding:9px 12px 9px 14px}
+  .ai-sum-card::before{width:3px}
+  .ai-sum-label{margin-bottom:0;font-size:10px;letter-spacing:.5px}
+  .ai-sum-num-row{margin-left:auto;gap:2px}
+  .ai-sum-num{font-size:20px}
+  .ai-sum-caption{flex-basis:100%;font-size:9.5px;margin-top:0}
+  .ai-sum-bar{flex-basis:100%;margin-top:4px}
+
+  /* 4-box analysis-summary は2x2に */
+  .analysis-summary{grid-template-columns:repeat(2,1fr);gap:6px}
+  .sum-num{font-size:22px}
+
+  /* 重点店舗カードのKPIメトリックを更に圧縮 */
+  .ai-store-name{font-size:14px}
+  .ai-store-card{padding:13px 13px 13px 17px}
+  .ai-metric{padding:6px 7px}
+  .ai-metric-val{font-size:12.5px}
+
+  /* insight-row（5要素のうち1要素は隠す） */
+  .insight-store{font-size:12px}
+  .insight-score{font-size:12px;padding:3px 7px;min-width:36px}
+}
 </style>
 </head>
 <body>
