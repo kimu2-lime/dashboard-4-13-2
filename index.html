@@ -551,6 +551,128 @@ body.mobile .search-box{width:100%}
   .insight-row{grid-template-columns:28px 1fr auto auto;gap:8px}
   .insight-reason{display:none}
 }
+
+/* ============================================================
+   AI分析セクション（data/ai-analysis.json 由来）
+   - 既存トークン(#667eea/#764ba2/.status-*)に合わせた配色
+   - 課題分析ビュー最上部に統合
+============================================================ */
+.ai-section{margin-bottom:18px}
+.ai-section-title{font-size:13px;font-weight:800;color:#1a1a2e;margin-bottom:10px;display:flex;align-items:center;gap:8px;letter-spacing:.3px}
+.ai-section-title .ai-mark{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:6px;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;font-size:11px;font-weight:800}
+.ai-section-sub{font-size:11px;font-weight:500;color:#999;margin-left:6px}
+.ai-updated-at{margin-left:auto;font-size:11px;color:#aaa;font-weight:500}
+
+/* AIサマリーバー（critical/warning/stable 3枚） */
+.ai-summary-bar{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px}
+.ai-sum-card{position:relative;background:#fff;border-radius:12px;border:1.5px solid #eaeaf4;padding:14px 18px;overflow:hidden;transition:transform .15s,box-shadow .15s}
+.ai-sum-card:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(0,0,0,.08)}
+.ai-sum-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px}
+.ai-sum-card.critical{border-color:#fca5a5}
+.ai-sum-card.critical::before{background:#ef4444}
+.ai-sum-card.warning{border-color:#fcd34d}
+.ai-sum-card.warning::before{background:#f59e0b}
+.ai-sum-card.stable{border-color:#86efac}
+.ai-sum-card.stable::before{background:#10b981}
+.ai-sum-label{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#aaa;margin-bottom:4px}
+.ai-sum-num-row{display:flex;align-items:baseline;gap:6px}
+.ai-sum-num{font-size:28px;font-weight:800;line-height:1;color:#1a1a2e;letter-spacing:-.5px}
+.ai-sum-card.critical .ai-sum-num{color:#ef4444}
+.ai-sum-card.warning .ai-sum-num{color:#f59e0b}
+.ai-sum-card.stable .ai-sum-num{color:#10b981}
+.ai-sum-unit{font-size:12px;font-weight:600;color:#888}
+.ai-sum-caption{font-size:11px;color:#888;margin-top:4px}
+.ai-sum-bar{height:4px;border-radius:2px;background:#f0f0f8;margin-top:10px;overflow:hidden}
+.ai-sum-bar-fill{height:100%;transition:width .4s}
+.ai-sum-card.critical .ai-sum-bar-fill{background:#ef4444}
+.ai-sum-card.warning .ai-sum-bar-fill{background:#f59e0b}
+.ai-sum-card.stable .ai-sum-bar-fill{background:#10b981}
+@media(max-width:640px){.ai-summary-bar{grid-template-columns:1fr}}
+
+/* AI重点店舗カードグリッド */
+.ai-priority-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:14px}
+.ai-store-card{position:relative;background:#fff;border-radius:14px;border:1.5px solid #eaeaf4;padding:18px 20px;overflow:hidden;transition:box-shadow .2s,transform .15s;display:flex;flex-direction:column}
+.ai-store-card:hover{box-shadow:0 6px 24px rgba(0,0,0,.08);transform:translateY(-1px)}
+.ai-store-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:5px}
+.ai-store-card.critical{border-color:#fca5a5}
+.ai-store-card.critical::before{background:linear-gradient(180deg,#ef4444,#dc2626)}
+.ai-store-card.warning{border-color:#fcd34d}
+.ai-store-card.warning::before{background:linear-gradient(180deg,#f59e0b,#d97706)}
+.ai-store-card.stable{border-color:#86efac}
+.ai-store-card.stable::before{background:linear-gradient(180deg,#10b981,#059669)}
+
+.ai-store-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:12px}
+.ai-store-rank{font-size:10px;font-weight:800;letter-spacing:1.5px;color:#999;background:#f0f0f8;padding:2px 7px;border-radius:4px;display:inline-block;margin-bottom:6px}
+.ai-store-name{font-size:15px;font-weight:800;color:#1a1a2e;line-height:1.35}
+.ai-store-owner{font-size:11px;color:#888;margin-top:3px}
+.ai-store-owner b{color:#667eea}
+.ai-priority-chip{flex-shrink:0;font-size:10px;font-weight:800;padding:3px 10px;border-radius:14px;letter-spacing:.8px}
+.ai-priority-chip.critical{background:#fee2e2;color:#991b1b}
+.ai-priority-chip.warning{background:#fef3c7;color:#92400e}
+.ai-priority-chip.stable{background:#d1fae5;color:#065f46}
+
+.ai-main-issue{background:#fafafe;border-radius:10px;padding:10px 12px;font-size:12px;color:#444;line-height:1.55;margin-bottom:12px;border:1px solid #f0f0f8}
+.ai-main-issue-label{font-size:9px;font-weight:800;letter-spacing:1.2px;color:#aaa;text-transform:uppercase;margin-bottom:3px}
+
+.ai-metric-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px}
+.ai-metric{background:#fff;border:1.5px solid #eaeaf4;border-radius:8px;padding:8px 10px}
+.ai-metric-label{font-size:9px;font-weight:700;color:#aaa;letter-spacing:.5px;margin-bottom:2px}
+.ai-metric-val{font-size:14px;font-weight:800;color:#1a1a2e;line-height:1.1}
+.ai-metric-unit{font-size:10px;color:#888;font-weight:600;margin-left:1px}
+.ai-store-card.critical .ai-metric.accent .ai-metric-val{color:#ef4444}
+.ai-store-card.warning .ai-metric.accent .ai-metric-val{color:#f59e0b}
+.ai-store-card.stable .ai-metric.accent .ai-metric-val{color:#10b981}
+
+.ai-trend{font-size:11px;color:#666;background:#f8f9ff;border-radius:6px;padding:6px 10px;margin-bottom:10px;line-height:1.5}
+.ai-trend b{color:#1a1a2e;font-weight:700;margin-right:4px}
+
+.ai-summary-text{font-size:12px;color:#444;line-height:1.6;margin-bottom:12px}
+
+.ai-block{margin-bottom:10px}
+.ai-block-title{font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:#888;margin-bottom:5px;display:flex;align-items:center;gap:5px}
+.ai-block-title::before{content:'';width:6px;height:6px;border-radius:50%;background:#10b981;display:inline-block}
+.ai-block.avoid .ai-block-title::before{background:#ef4444}
+.ai-block.know .ai-block-title::before{background:#a78bfa}
+.ai-block-title.do{color:#047857}
+.ai-block-title.no{color:#b91c1c}
+.ai-block-title.know{color:#6d28d9}
+.ai-action-list{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:5px}
+.ai-action-item{display:flex;gap:8px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:7px 10px;font-size:11.5px;color:#14532d;line-height:1.5}
+.ai-action-num{flex-shrink:0;width:16px;height:16px;border-radius:50%;background:#10b981;color:#fff;font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center;margin-top:1px}
+.ai-block.avoid .ai-action-item{background:#fef2f2;border-color:#fecaca;color:#7f1d1d}
+.ai-block.avoid .ai-action-item::before{content:'×';flex-shrink:0;width:16px;height:16px;border-radius:50%;background:#ef4444;color:#fff;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;margin-top:1px}
+.ai-know-list{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:3px}
+.ai-know-item{font-size:10.5px;color:#5b21b6;background:#f5f3ff;border-radius:6px;padding:5px 9px;border:1px solid #ddd6fe;line-height:1.45}
+.ai-know-item.unavailable{color:#9ca3af;background:#f9fafb;border-color:#e5e7eb;font-style:italic}
+.ai-know-item::before{content:'›';margin-right:5px;font-weight:700;color:#a78bfa}
+.ai-know-item.unavailable::before{color:#cbd5e1}
+
+@media(max-width:640px){
+  .ai-priority-grid{grid-template-columns:1fr}
+  .ai-metric-grid{grid-template-columns:repeat(3,1fr)}
+}
+
+/* AIアラート */
+.ai-alerts-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px}
+.ai-alert-card{background:#fff;border-radius:10px;border:1.5px solid #eaeaf4;padding:12px 14px;display:flex;align-items:flex-start;gap:10px;transition:transform .15s,box-shadow .15s}
+.ai-alert-card:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(0,0,0,.07)}
+.ai-alert-card.critical{border-color:#fca5a5;background:linear-gradient(135deg,#fff5f5,#fff)}
+.ai-alert-card.warning{border-color:#fcd34d;background:linear-gradient(135deg,#fffbeb,#fff)}
+.ai-alert-dot{flex-shrink:0;width:10px;height:10px;border-radius:50%;margin-top:4px;box-shadow:0 0 12px}
+.ai-alert-card.critical .ai-alert-dot{background:#ef4444;box-shadow:0 0 12px rgba(239,68,68,.6)}
+.ai-alert-card.warning .ai-alert-dot{background:#f59e0b;box-shadow:0 0 12px rgba(245,158,11,.5)}
+.ai-alert-body{flex:1;min-width:0}
+.ai-alert-store{font-size:12.5px;font-weight:800;color:#1a1a2e;margin-bottom:3px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.ai-alert-severity{font-size:9px;font-weight:800;padding:1px 6px;border-radius:4px;letter-spacing:.6px}
+.ai-alert-card.critical .ai-alert-severity{background:#fee2e2;color:#991b1b}
+.ai-alert-card.warning  .ai-alert-severity{background:#fef3c7;color:#92400e}
+.ai-alert-msg{font-size:11px;color:#555;line-height:1.55}
+
+/* AI badge を見える状態にする際の整え */
+.ai-badge.live{background:linear-gradient(135deg,#ede9fe,#ddd6fe);color:#6d28d9;border-color:#c4b5fd}
+.ai-badge.live::before{content:'';display:inline-block;width:6px;height:6px;border-radius:50%;background:#7c3aed;margin-right:4px;box-shadow:0 0 8px rgba(124,58,237,.7)}
+
+.ai-empty{padding:20px;text-align:center;color:#aaa;font-size:12px;background:#fafafe;border-radius:10px;border:1px dashed #e0e0ec}
 </style>
 </head>
 <body>
@@ -834,6 +956,38 @@ body.mobile .search-box{width:100%}
         </div>
       </div>
 
+      <!-- AI分析セクション（data/ai-analysis.json 由来）
+           - 読み込み失敗時は静かに非表示にして既存ビューに影響を与えない
+           - 担当者・直営/加盟フィルターと連動 -->
+      <div id="aiSummaryBarSection" class="ai-section" style="display:none">
+        <div class="ai-section-title">
+          <span class="ai-mark">AI</span>
+          店舗ステータス
+          <span class="ai-section-sub">data/ai-analysis.json 由来</span>
+          <span class="ai-updated-at" id="aiUpdatedAt"></span>
+        </div>
+        <div class="ai-summary-bar" id="aiSummaryBar"></div>
+      </div>
+
+      <div id="aiPrioritySection" class="ai-section" style="display:none">
+        <div class="ai-section-title">
+          <span class="ai-mark">AI</span>
+          重点店舗 <span id="aiPriorityCount"></span>
+          <span class="ai-section-sub">数値根拠ベースで抽出／critical → warning の順</span>
+        </div>
+        <div class="ai-priority-grid" id="aiPriorityGrid"></div>
+        <div class="ai-empty" id="aiPriorityEmpty" style="display:none">該当する重点店舗はありません（フィルター解除で全件表示）</div>
+      </div>
+
+      <div id="aiAlertsSection" class="ai-section" style="display:none">
+        <div class="ai-section-title">
+          <span class="ai-mark">AI</span>
+          緊急アラート <span id="aiAlertCount"></span>
+          <span class="ai-section-sub">データ異常／稼働停止／崩壊予兆を検出</span>
+        </div>
+        <div class="ai-alerts-grid" id="aiAlertsGrid"></div>
+      </div>
+
       <!-- Phase 1: 危険店舗TOP5 / 優先介入TOP10
            - buildStoreInsight() の出力をソートして上位を表示
            - 担当者・直営/加盟フィルター連動 -->
@@ -1044,6 +1198,8 @@ function init(){
   renderList();
   // ページ読み込み時に自動でdata.jsonを取得
   fetchData();
+  // AI分析結果（data/ai-analysis.json）も並行ロード
+  loadAiAnalysis();
 }
 
 function buildYearTabs(){
@@ -1135,6 +1291,8 @@ function selectStoreType(t){
     b.className='type-btn'+(b.dataset.type===t?' '+clsMap[t]:'');
   });
   renderList(); goList();
+  if(document.getElementById('analysisView').style.display!=='none') renderAnalysis();
+  if(document.getElementById('rankingView').style.display !=='none') renderRanking();
 }
 
 function fmt(v){return'¥'+Math.round(v).toLocaleString('ja-JP')}
@@ -2854,7 +3012,230 @@ function escHtml(s) {
     .replace(/'/g, '&#39;');
 }
 
+/* ============================================================
+   AI分析セクション（data/ai-analysis.json）
+   - 担当者(curPerson) / 店舗タイプ(curStoreType) / 分析フィルター(analysisFilter) 連動
+   - 読み込み失敗時は静かに非表示にして既存ビューを壊さない
+============================================================ */
+let AI_ANALYSIS = null;
+
+async function loadAiAnalysis() {
+  try {
+    const base = location.origin + location.pathname.replace(/\/[^\/]*$/, '');
+    const url = base + '/data/ai-analysis.json';
+    const resp = await fetch(url + '?t=' + Date.now());
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    AI_ANALYSIS = await resp.json();
+    const badge = document.getElementById('aiBadge');
+    if (badge) {
+      badge.style.display = 'inline-flex';
+      badge.classList.add('live');
+      badge.textContent = '✨ AI診断 最新';
+    }
+    // 課題分析タブが今表示中なら即描画
+    if (document.getElementById('analysisView').style.display !== 'none') {
+      renderAiAnalysis();
+    }
+  } catch (e) {
+    console.warn('[AI] ai-analysis.json の読み込みに失敗:', e);
+    AI_ANALYSIS = null;
+  }
+}
+
+function escAi(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+function aiYen(v) {
+  if (!v || v <= 0) return '¥0';
+  return '¥' + Math.round(v).toLocaleString('ja-JP');
+}
+function aiMatchOwner(owner)        { return curPerson === '全店舗' || owner === curPerson; }
+function aiMatchStoreType(storeName){
+  if (curStoreType === '全店舗') return true;
+  const t = DATA.store_type && DATA.store_type[storeName];
+  if (!t) return true; // 不明はフィルターしない
+  return t === curStoreType;
+}
+function aiMatchAnalysisFilter(priority) {
+  if (analysisFilter === 'all') return true;
+  if (analysisFilter === 'critical') return priority === 'critical';
+  if (analysisFilter === 'warning')  return priority === 'warning';
+  return true;
+}
+
+function renderAiAnalysis() {
+  const secSummary  = document.getElementById('aiSummaryBarSection');
+  const secPriority = document.getElementById('aiPrioritySection');
+  const secAlerts   = document.getElementById('aiAlertsSection');
+  if (!AI_ANALYSIS) {
+    if (secSummary)  secSummary.style.display  = 'none';
+    if (secPriority) secPriority.style.display = 'none';
+    if (secAlerts)   secAlerts.style.display   = 'none';
+    return;
+  }
+  renderAiSummaryBar();
+  renderAiPriorityStores();
+  renderAiAlerts();
+}
+
+function renderAiSummaryBar() {
+  const sec  = document.getElementById('aiSummaryBarSection');
+  const wrap = document.getElementById('aiSummaryBar');
+  const upd  = document.getElementById('aiUpdatedAt');
+  const s = AI_ANALYSIS.summary || {};
+  const total = (s.criticalStores||0) + (s.warningStores||0) + (s.stableStores||0);
+  const pct = function(n){ return total > 0 ? Math.round(n / total * 100) : 0; };
+  const card = function(cls, label, num, caption){
+    return '<div class="ai-sum-card ' + cls + '">'
+      + '<div class="ai-sum-label">' + label + '</div>'
+      + '<div class="ai-sum-num-row"><span class="ai-sum-num">' + num + '</span><span class="ai-sum-unit">店舗</span></div>'
+      + '<div class="ai-sum-caption">' + caption + ' / 全体の ' + pct(num) + '%</div>'
+      + '<div class="ai-sum-bar"><div class="ai-sum-bar-fill" style="width:' + pct(num) + '%"></div></div>'
+      + '</div>';
+  };
+  wrap.innerHTML =
+    card('critical','🔴 CRITICAL', s.criticalStores||0, '即時対応必要') +
+    card('warning', '🟡 WARNING',  s.warningStores||0,  '今月中に改善') +
+    card('stable',  '🟢 STABLE',   s.stableStores||0,   '維持運用');
+  let upText = '';
+  if (AI_ANALYSIS.generatedAt) {
+    const d = new Date(AI_ANALYSIS.generatedAt);
+    if (!isNaN(d.getTime())) {
+      upText = '更新 ' + d.toLocaleString('ja-JP', {year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'});
+    }
+  }
+  if (upd) upd.textContent = upText;
+  sec.style.display = '';
+}
+
+function renderAiPriorityStores() {
+  const sec     = document.getElementById('aiPrioritySection');
+  const grid    = document.getElementById('aiPriorityGrid');
+  const empty   = document.getElementById('aiPriorityEmpty');
+  const countEl = document.getElementById('aiPriorityCount');
+  const ord = {critical:0, warning:1, stable:2};
+  const all = (AI_ANALYSIS.priorityStores || []).slice().sort(function(a,b){
+    return (ord[a.priority] == null ? 9 : ord[a.priority]) -
+           (ord[b.priority] == null ? 9 : ord[b.priority]);
+  });
+  const filtered = all.filter(function(s){
+    return aiMatchOwner(s.owner) &&
+           aiMatchStoreType(s.store) &&
+           aiMatchAnalysisFilter(s.priority);
+  });
+  grid.innerHTML = '';
+  if (countEl) countEl.textContent = '(' + filtered.length + ' / ' + all.length + ')';
+  if (filtered.length === 0) {
+    empty.style.display = '';
+  } else {
+    empty.style.display = 'none';
+    filtered.forEach(function(store, idx){
+      grid.appendChild(buildAiPriorityCard(store, idx + 1));
+    });
+  }
+  sec.style.display = '';
+}
+
+function buildAiPriorityCard(store, rank) {
+  const div = document.createElement('div');
+  const priority = store.priority || 'warning';
+  div.className = 'ai-store-card ' + priority;
+  const m = store.metrics || {};
+  const priorityLabel = ({critical:'CRITICAL', warning:'WARNING', stable:'STABLE'})[priority] || priority.toUpperCase();
+
+  const actionsHtml = (store.actions || []).map(function(a, i){
+    return '<li class="ai-action-item"><span class="ai-action-num">' + (i+1) + '</span><span>' + escAi(a) + '</span></li>';
+  }).join('');
+  const avoidHtml = (store.avoidActions || []).map(function(a){
+    return '<li class="ai-action-item">' + escAi(a) + '</li>';
+  }).join('');
+  const knowHtml = (store.knowledgeRefs || []).map(function(k){
+    const unavailable = /knowledge unavailable/i.test(k);
+    return '<li class="ai-know-item' + (unavailable ? ' unavailable' : '') + '">' + escAi(k) + '</li>';
+  }).join('');
+
+  div.innerHTML =
+    '<div class="ai-store-head">'
+      + '<div>'
+        + '<span class="ai-store-rank">#' + rank + ' PRIORITY</span>'
+        + '<div class="ai-store-name">' + escAi(store.store) + '</div>'
+        + '<div class="ai-store-owner">担当 <b>' + escAi(store.owner || '-') + '</b></div>'
+      + '</div>'
+      + '<span class="ai-priority-chip ' + priority + '">' + priorityLabel + '</span>'
+    + '</div>'
+
+    + '<div class="ai-main-issue">'
+      + '<div class="ai-main-issue-label">MAIN ISSUE</div>'
+      + escAi(store.mainIssue || '')
+    + '</div>'
+
+    + '<div class="ai-metric-grid">'
+      + '<div class="ai-metric accent"><div class="ai-metric-label">新規</div><div class="ai-metric-val">' + (m.newCustomers || 0) + '<span class="ai-metric-unit">件</span></div></div>'
+      + '<div class="ai-metric accent"><div class="ai-metric-label">契約率</div><div class="ai-metric-val">' + (m.closingRate || 0) + '<span class="ai-metric-unit">%</span></div></div>'
+      + '<div class="ai-metric accent"><div class="ai-metric-label">単価</div><div class="ai-metric-val">' + aiYen(m.unitPrice || 0) + '</div></div>'
+    + '</div>'
+
+    + (m.monthlyTrend ? ('<div class="ai-trend"><b>推移:</b>' + escAi(m.monthlyTrend) + '</div>') : '')
+    + (store.summary ? ('<div class="ai-summary-text">' + escAi(store.summary) + '</div>') : '')
+
+    + (actionsHtml ?
+        ('<div class="ai-block do">'
+          + '<div class="ai-block-title do">優先アクション</div>'
+          + '<ul class="ai-action-list">' + actionsHtml + '</ul>'
+        + '</div>') : '')
+
+    + (avoidHtml ?
+        ('<div class="ai-block avoid">'
+          + '<div class="ai-block-title no">優先度を下げる施策</div>'
+          + '<ul class="ai-action-list">' + avoidHtml + '</ul>'
+        + '</div>') : '')
+
+    + (knowHtml ?
+        ('<div class="ai-block know">'
+          + '<div class="ai-block-title know">Knowledge参照元</div>'
+          + '<ul class="ai-know-list">' + knowHtml + '</ul>'
+        + '</div>') : '');
+  return div;
+}
+
+function renderAiAlerts() {
+  const sec     = document.getElementById('aiAlertsSection');
+  const grid    = document.getElementById('aiAlertsGrid');
+  const countEl = document.getElementById('aiAlertCount');
+  const all = (AI_ANALYSIS.alerts || []).slice().sort(function(a, b){
+    return (a.severity === 'critical' ? 0 : 1) - (b.severity === 'critical' ? 0 : 1);
+  });
+  // 担当者・店舗タイプフィルターは alerts には適用しない（障害情報は常時可視）
+  // ただし analysisFilter (critical/warning) には連動
+  let filtered = all;
+  if (analysisFilter === 'critical') filtered = all.filter(function(a){ return a.severity === 'critical'; });
+  else if (analysisFilter === 'warning') filtered = all.filter(function(a){ return a.severity === 'warning'; });
+  if (countEl) countEl.textContent = '(' + filtered.length + ')';
+  if (filtered.length === 0) {
+    sec.style.display = 'none';
+    return;
+  }
+  grid.innerHTML = filtered.map(function(a){
+    return '<div class="ai-alert-card ' + escAi(a.severity || 'warning') + '">'
+      + '<span class="ai-alert-dot"></span>'
+      + '<div class="ai-alert-body">'
+        + '<div class="ai-alert-store">' + escAi(a.store) + '<span class="ai-alert-severity">' + escAi((a.severity || 'warning').toUpperCase()) + '</span></div>'
+        + '<div class="ai-alert-msg">' + escAi(a.message || '') + '</div>'
+      + '</div>'
+    + '</div>';
+  }).join('');
+  sec.style.display = '';
+}
+
 function renderAnalysis() {
+  // AI分析セクション（data/ai-analysis.json）を最上部に描画
+  renderAiAnalysis();
+
   const month = curMonth;
   const monthData = (DATA.data && DATA.data[month]) ? DATA.data[month] : {};
   const targets = DATA.targets || {};

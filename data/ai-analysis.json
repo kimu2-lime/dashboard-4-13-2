@@ -1,0 +1,201 @@
+{
+  "generatedAt": "2026-05-15T00:00:00.000Z",
+  "summary": {
+    "criticalStores": 30,
+    "warningStores": 30,
+    "stableStores": 19
+  },
+  "priorityStores": [
+    {
+      "store": "Belle仙台",
+      "owner": "佐々木剛生",
+      "priority": "critical",
+      "mainIssue": "集客は十分だが契約率4.0%で壊滅。新規25人で契約1件のみ",
+      "metrics": {
+        "newCustomers": 25,
+        "closingRate": 4.0,
+        "unitPrice": 177600,
+        "monthlyTrend": "1月0% → 2月3.3% → 3月5.3% → 4月4.0%（契約率4ヶ月連続5%以下）"
+      },
+      "summary": "来店101件・単価¥177,600のポテンシャルがあるのに月1契約。契約率20%に戻せば月+¥600万。",
+      "actions": [
+        "4月新規未契約者24名に施術後14日以内でLINE再アプローチ＋電話カウンセリング再実施（今週中）",
+        "HPBクーポン上位3本の2枚目にコース内容＋¥177,600の根拠を文字入れ、クーポン名に『初回限定／カウンセリング込60分』追加",
+        "4月唯一の契約者から症例写真許可取得→HPBメイン3枚目・特集・ブログ・サロンデータへ展開"
+      ],
+      "avoidActions": [
+        "新規集客SEO施策（既に新規25で十分）",
+        "新メニュー開発（既存¥177,600が売れていない＝商品問題ではない）"
+      ],
+      "knowledgeRefs": [
+        "hpb_photo.md: クーポン画像運用（1枚目通常ハーブ／2枚目施術画像）",
+        "hpb_conversion.md: コピー紹介文の書き換え（リピート率・成分・他社との違い）",
+        "hpb_photo.md: ビフォーアフター写真（店長へ症例依頼）",
+        "hpb_seo.md: 検索ワードとページ内容の一致度",
+        "knowledge unavailable: first_visit_closing.md / line_follow.md（契約率改善・再アプローチ）"
+      ]
+    },
+    {
+      "store": "Belle熊本",
+      "owner": "中山拓実",
+      "priority": "critical",
+      "mainIssue": "契約率の継続劣化23.5%→5.3%＋5月急失速（売上¥41,200／12日）",
+      "metrics": {
+        "newCustomers": 19,
+        "closingRate": 5.3,
+        "unitPrice": 156000,
+        "monthlyTrend": "1月23.5% → 2月23.3% → 3月15.4% → 4月5.3%（契約率4ヶ月で-18pt）／5月着地新規8"
+      },
+      "summary": "来店83件は維持。5月で売上が1月の1/7。運用障害の可能性あり、即時原因切り分けが緊急。",
+      "actions": [
+        "5月稼働状況の即時店長ヒアリング（スタッフ欠勤・予約システム不具合・HPB掲載停止のどれか）",
+        "HPB店名サブタイトルに『ハーブピーリング専門店』追加、キャッチを『【繰り返すニキビに】口コミ★4.9』型へ書き換え",
+        "4月新規未契約者18名へ2回目特別カウンセリング招待LINE送信"
+      ],
+      "avoidActions": [
+        "新規集客のSNS/ブログ施策（来店83で十分、契約率の止血が先）",
+        "単価アップ施策（単価¥156,000は既に高水準）"
+      ],
+      "knowledgeRefs": [
+        "hpb_conversion.md: 店名見直し／キャッチコピー＝共感＋信頼度の数値化",
+        "hpb_seo.md: 検索ヒット順位優先度（1.店名 2.サロンデータ 3.キャッチ）",
+        "knowledge unavailable: operation.md / first_visit_closing.md / line_follow.md"
+      ]
+    },
+    {
+      "store": "Belle代々木",
+      "owner": "吉嶋早希",
+      "priority": "warning",
+      "mainIssue": "集客全店上位（新規51）なのに単価¥16,778で低額メニューに偏重",
+      "metrics": {
+        "newCustomers": 51,
+        "closingRate": 35.3,
+        "unitPrice": 16778,
+        "monthlyTrend": "3月単価¥10,000 → 4月¥16,778 → 5月¥10,000（一貫して低単価帯）"
+      },
+      "summary": "契約率35.3%は健全。商品設計とアップセルの問題。クーポン構成を上位価格へ差し替えで月+¥50万。",
+      "actions": [
+        "HPB上位クーポンを『初回¥10,000単発』から『3回コース¥80,000／6回コース¥150,000』へ差し替え",
+        "4月契約18名のメニュー内訳抽出→単発のみ層に次回コース提案設計",
+        "HPBキャッチ・サロンデータ・ブログ・口コミ返信に『水光肌／陶器肌／白玉肌／肌管理』を自然分散"
+      ],
+      "avoidActions": [
+        "新規集客のためのリール強化（新規51で全店上位、集客投資は不要）",
+        "契約率改善カウンセリング訓練（35.3%は健全水準）"
+      ],
+      "knowledgeRefs": [
+        "hpb_photo.md: クーポン画像運用",
+        "hpb_conversion.md: コピー紹介文の書き換え",
+        "hpb_keywords.md: 手法・状態ワード（水光肌／陶器肌／白玉肌）",
+        "hpb_seo.md: ワード分散戦略",
+        "knowledge unavailable: first_visit_closing.md / high_retention_store.md（アップセル）"
+      ]
+    },
+    {
+      "store": "Belle那覇おもろまち",
+      "owner": "木村颯真",
+      "priority": "warning",
+      "mainIssue": "単価が2月¥82,193→4月¥22,094と崩落。集客は全店上位で問題なし",
+      "metrics": {
+        "newCustomers": 46,
+        "closingRate": 15.2,
+        "unitPrice": 22094,
+        "monthlyTrend": "2月単価¥82,193 → 3月¥54,350 → 4月¥22,094（-73%）／5月¥69,067に回復"
+      },
+      "summary": "来店119件・新規46で集客◎。4月単価崩落の原因切り分けが先決。",
+      "actions": [
+        "4月契約7件のメニュー内訳抽出（低額入口クーポンの上位流入確認）",
+        "HPB特集バナー＆クーポン上位の文字入り画像を文字なし版へ差し替え（アプリ実機確認）",
+        "4月来店119名のうち未契約112名から再来店履歴あり30名へコース提案LINE"
+      ],
+      "avoidActions": [
+        "新規集客強化（来店119・新規46で十分）",
+        "店名変更（文章／画像／クーポン側の問題で店名は無関係）"
+      ],
+      "knowledgeRefs": [
+        "hpb_photo.md: アプリ版の罠（文字入り画像は半分以上隠れる）／3枚目メイン高解像度差し替え",
+        "knowledge unavailable: repeat_line.md / line_follow.md（リピート促進）"
+      ]
+    },
+    {
+      "store": "LIME札幌",
+      "owner": "木村颯真",
+      "priority": "critical",
+      "mainIssue": "新規連続失速（3月37→4月17→5月着地13）。HPB集客力そのものが弱体化",
+      "metrics": {
+        "newCustomers": 17,
+        "closingRate": 11.8,
+        "unitPrice": 58700,
+        "monthlyTrend": "3月37 → 4月17（-54%）→ 5月着地13。来店も72→30→13と急減"
+      },
+      "summary": "5月で売上が3月の1/4。LIME系最下位水準。集客復活が最優先で契約率/単価議論は後。",
+      "actions": [
+        "3月新規37を生んだHPBクリエイティブ（特集・クーポン・ブログ・TOPコピー）を復元、4月以降変更箇所を3月版へロールバック",
+        "HPBブログを『1記事=1悩み』で週3本投下、各記事内に『ハーブピーリング』を3〜4回自然分散",
+        "店名サブタイトルに『ハーブピーリング専門店』追加、キャッチを『【繰り返すニキビに】口コミ★4.9』型へ書き換え"
+      ],
+      "avoidActions": [
+        "契約率改善施策（母数の新規がまず足りない、集客復活が先）",
+        "単価アップ施策（客が来ていない局面で議論する順番が違う）"
+      ],
+      "knowledgeRefs": [
+        "hpb_blog_seo.md: 1記事=1悩み特化／キーワード分散配置／フリーワードランキング連動",
+        "hpb_seo.md: 検索ヒット順位優先度",
+        "hpb_conversion.md: 店名見直し／キャッチコピー構成",
+        "knowledge unavailable: operation.md / low_new_store.md（変更管理・新規低迷対策）"
+      ]
+    }
+  ],
+  "alerts": [
+    {
+      "store": "Belle天王寺",
+      "message": "3月新規14→4月1→5月着地0。担当不在表示、本部直轄で稼働確認必須",
+      "severity": "critical"
+    },
+    {
+      "store": "LIME心斎橋",
+      "message": "4月新規1／5月着地0。崩壊状態、稼働確認必須",
+      "severity": "critical"
+    },
+    {
+      "store": "直営 東銀座",
+      "message": "4月新規10件あったが5月着地0。5月稼働障害の可能性",
+      "severity": "critical"
+    },
+    {
+      "store": "LIME武蔵小杉",
+      "message": "契約率-11.1%（返金/取消発生）／5月着地0。データ異常確認要",
+      "severity": "critical"
+    },
+    {
+      "store": "Belle赤羽",
+      "message": "契約単価¥-3,962（マイナス）。データ異常または値引超過、確認推奨",
+      "severity": "warning"
+    },
+    {
+      "store": "Belle目黒",
+      "message": "契約単価¥4,333は他全店比で異常値。メニュー設定／データ取込確認推奨",
+      "severity": "warning"
+    },
+    {
+      "store": "Belle入間市",
+      "message": "4月新規0／5月着地0。未稼働または休業中",
+      "severity": "warning"
+    },
+    {
+      "store": "Belle広島",
+      "message": "3月12→4月8（-33%）→5月着地3。前月比-63%で急失速",
+      "severity": "warning"
+    },
+    {
+      "store": "Belle札幌",
+      "message": "3月26→4月9（-65%）。新規急減",
+      "severity": "warning"
+    },
+    {
+      "store": "Belle松江",
+      "message": "3月16→4月7（-56%）。新規急減",
+      "severity": "warning"
+    }
+  ]
+}
