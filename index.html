@@ -218,8 +218,11 @@ body{font-family:'Hiragino Kaku Gothic ProN','Noto Sans JP','Yu Gothic',sans-ser
 .direct-common-card{background:#f7f7fc;border-radius:10px;padding:12px 14px}
 /* menu-break-grid は ≤640px統合ブロック側で 1fr に切替 */
 
-/* MOBILE — body.mobile（手動SP切替）用の最小override
-   ※ ≤640px向けのスタイル本体はファイル末尾の統合ブロックを参照 */
+/* MOBILE — body.mobile（自動/手動SP切替）用の最小override
+   ※ ≤640px向けのスタイル本体はファイル末尾の統合ブロックを参照
+   ※ 自動判定は updateResponsiveMode()（≤768px）で付与 */
+body{transition:padding .2s ease, font-size .2s ease}
+.main,.header-inner{transition:padding .2s ease}
 body.mobile .cards-grid{grid-template-columns:1fr}
 body.mobile .detail-kpis{grid-template-columns:repeat(2,1fr)}
 body.mobile .detail-kpis-2{grid-template-columns:repeat(2,1fr)}
@@ -1421,6 +1424,27 @@ function setView(m){
   document.getElementById('vsPC').classList.toggle('active',m==='pc');
   document.getElementById('vsSP').classList.toggle('active',m==='sp');
 }
+
+// ===== 自動レスポンシブ切替（≤768pxで body.mobile を付与） =====
+const MOBILE_BREAKPOINT = 768;
+function updateResponsiveMode(){
+  const isMobile = window.innerWidth <= MOBILE_BREAKPOINT;
+  document.body.classList.toggle('mobile', isMobile);
+  const vsPC = document.getElementById('vsPC');
+  const vsSP = document.getElementById('vsSP');
+  if(vsPC) vsPC.classList.toggle('active', !isMobile);
+  if(vsSP) vsSP.classList.toggle('active', isMobile);
+}
+let _respRaf = null;
+function _scheduleResponsiveUpdate(){
+  if(_respRaf) return;
+  _respRaf = requestAnimationFrame(()=>{ _respRaf=null; updateResponsiveMode(); });
+}
+document.addEventListener('DOMContentLoaded', updateResponsiveMode);
+window.addEventListener('resize', _scheduleResponsiveUpdate);
+window.addEventListener('orientationchange', updateResponsiveMode);
+// DOMContentLoaded が既に発火済みのケース（スクリプトが後ろに置かれている等）にも対応
+if(document.readyState !== 'loading') updateResponsiveMode();
 
 function init(){
   loadSavedTargets();
